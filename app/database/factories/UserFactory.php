@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -25,6 +26,15 @@ class UserFactory extends Factory
             'document' => $type === 'common' ? $this->generateCpf() : $this->generateCnpj(),
             'type' => $type
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->wallet()->create([
+                'balance' => fake()->numberBetween(0, 10_000_000), // até R$ 10.000,00 em centavos
+            ]);
+        });
     }
 
     private function generateCpf(): string
