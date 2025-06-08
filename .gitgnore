@@ -1,0 +1,51 @@
+# Dependências
+/vendor/
+node_modules/
+
+# Arquivos do Composer
+composer.lock
+
+# Ambiente Laravel
+.env
+.env.*
+
+# Diretório de armazenamento
+/storage/*
+!/storage/app
+!/storage/app/public
+!/storage/framework
+!/storage/framework/cache
+!/storage/framework/sessions
+!/storage/framework/testing
+!/storage/framework/views
+!/storage/logs
+
+# Cache do Laravel
+bootstrap/cache/*.php
+
+# Testes
+.phpunit.result.cache
+
+# IDEs e editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Outros ignoráveis
+*.pid
+*.seed
+*.sqlite
+*.bak
+*.tmp
+*.swp

@@ -1,0 +1,95 @@
+version: "3.8" 
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    depends_on: 
+      - app
+    ports:
+      - "80:80"
+    volumes: 
+      - ./app:/var/www/app
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: 
+      - simplebank_net
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: app
+    working_dir: /var/www/app
+    volumes:
+      - ./app:/var/www/app
+    entrypoint: ["/var/www/app/entrypoint.sh"]
+    networks:
+      simplebank_net:
+        aliases:
+        - app.simplebank.local
+        - api.simplebank.local
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_DATABASE: simplebank
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      DB_PORT: 3306
+
+  queue_worker:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: queue_worker
+    working_dir: /var/www/app
+    volumes:
+      - ./app:/var/www/app
+    entrypoint: ["/var/www/app/entrypoint-worker.sh"]
+    networks:
+      - simplebank_net
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      DB_HOST: mysql
+      DB_DATABASE: simplebank
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      DB_PORT: 3306
+      QUEUE_CONNECTION: redis
+
+  mysql:
+    platform: linux/amd64
+    image: mysql:8.0 
+    container_name: mysql
+    restart: unless-stopped
+    ports: 
+      - "3306:3306"
+    volumes: 
+      - ./mysql:/var/lib/mysql
+    environment: 
+      MYSQL_DATABASE: simplebank
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+    networks: 
+      - simplebank_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - simplebank_net
+
+networks:
+  simplebank_net:
+    driver: bridge
