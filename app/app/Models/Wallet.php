@@ -37,7 +37,9 @@ class Wallet extends Model
      */
     protected function casts(): array
     {
-        return [];
+        return [
+            'balance' => 'integer',
+        ];
     }
 
     /**

@@ -27,13 +27,21 @@ class UserFactory extends Factory
             'type' => $type
         ];
     }
-
     public function configure(): static
     {
         return $this->afterCreating(function (User $user) {
-            $user->wallet()->create([
-                'balance' => fake()->numberBetween(0, 10_000_000), // até R$ 10.000,00 em centavos
-            ]);
+            $user->wallet()->create(['balance' => fake()->numberBetween(0, 10_000_000),]);
+        });
+    }
+
+    public function withBalance(int $balance): static
+    {
+        return $this->afterCreating(function ($user) use ($balance) {
+            if ($user->wallet()->exists()) {
+                $user->wallet()->update(['balance' => $balance]);
+            } else {
+                $user->wallet()->create(['balance' => $balance]);
+            }
         });
     }
 

@@ -21,6 +21,7 @@ class Transaction extends Model
     ];
 
     protected $casts = [
+        'amount' => 'integer',
         'type' => TransactionType::class,
     ];
 
