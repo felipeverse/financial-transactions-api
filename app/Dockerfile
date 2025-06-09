@@ -42,6 +42,15 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
+# Instala o Xdebug
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
+
+# Configura o Xdebug para cobertura de testes
+RUN echo "zend_extension=xdebug.so" > /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
 # Instala Composer (mais recente)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
