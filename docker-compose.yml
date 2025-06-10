@@ -13,6 +13,8 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     networks: 
       - simplebank_net
+    mem_limit: 128m
+    cpus: 0.25
 
   app:
     build:
@@ -36,6 +38,8 @@ services:
       DB_USERNAME: user
       DB_PASSWORD: password
       DB_PORT: 3306
+    mem_limit: 512m
+    cpus: 1.0
 
   queue_worker:
     build:
@@ -58,6 +62,8 @@ services:
       DB_PASSWORD: password
       DB_PORT: 3306
       QUEUE_CONNECTION: redis
+    mem_limit: 512m
+    cpus: 0.5
 
   mysql:
     platform: linux/amd64
@@ -80,6 +86,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    mem_limit: 1g
+    cpus: 2.0
 
   redis:
     image: redis:alpine
@@ -89,6 +97,8 @@ services:
       - "6379:6379"
     networks:
       - simplebank_net
+    mem_limit: 128m
+    cpus: 0.25
 
 networks:
   simplebank_net:
