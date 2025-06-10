@@ -8,6 +8,7 @@ Route::get('/', function () {
 });
 
 
-Route::name('api.')->group(function () {
-    Route::post('/deposit', [TransactionController::class, 'deposit'])->name('deposit');
+Route::name('api.transactions.')->prefix('/transactions/')->group(function () {
+    Route::post('deposit', [TransactionController::class, 'deposit'])->name('deposit');
+    Route::post('transfer', [TransactionController::class, 'transfer'])->name('transfer');
 });

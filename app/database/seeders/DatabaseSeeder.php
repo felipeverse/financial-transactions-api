@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(100)->create();
+        // Create 100 users with zero wallet balance.
+        User::factory(100)->withBalance(0)->create();
     }
 }
