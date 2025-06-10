@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Money;
 use App\Enums\TransactionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,5 +44,10 @@ class Transaction extends Model
     public function payeeWallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class, 'payee_wallet_id');
+    }
+
+    public function getAmountInReaisAttribute(): float
+    {
+        return Money::toReais($this->amount);
     }
 }

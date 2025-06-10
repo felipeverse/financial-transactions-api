@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Support\Money;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,5 +57,10 @@ class Wallet extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function getBalanceInReaisAttribute(): float
+    {
+        return Money::toReais($this->balance);
     }
 }
