@@ -2,67 +2,85 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Models\User;
-use App\Enums\UserType;
 use App\Models\Transaction;
 use App\Enums\TransactionType;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
-use App\DTOs\Services\Transaction\DepositResponse;
+use Symfony\Component\HttpFoundation\Response;
+use App\DTOs\Services\Responses\Transaction\DepositServiceResponseDTO;
 
 /**
- * Service handling transaction operations.
+ * Service reponsible for handling transactions operatios.
  */
 class TransactionService
 {
     /**
-     * Process a deposit for a user.
-     * Validates user and amount, updates wallet balance,
-     * logs the transaction, and returns the result.
-     *
-     * @param integer $payerId
-     * @param integer $valueInCents
-     * @return DepositResponse
+     * Flag to enable/disable pessimistic locking during wallet updates.
      */
-    public function deposit(int $payerId, int $valueInCents): DepositResponse
+    protected bool $usePessimisticLock;
+
+    public function __construct()
     {
+        $this->usePessimisticLock = config('feature-flags.use_pessimistic_lock', true);
+    }
+
+    /**
+     * Performs a deposit operation into a user's wallet.
+     *
+     * @param integer $payerId - ID of the user receiving the deposit
+     * @param integer $valueInCents - Deposit amount in cents
+     * @return DepositServiceResponseDTO - Standarzid seervice response
+     */
+    public function deposit(int $payerId, int $valueInCents): DepositServiceResponseDTO
+    {
+        // Validate positive amount
+        if ($valueInCents <= 0) {
+            return DepositServiceResponseDTO::failure(
+                'Amount must be greater than 0.',
+                statusCode: Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        }
+
+        // Eager load wallet to avoid N+1 query later
         $user = User::with('wallet')->find($payerId);
 
         if (! $user) {
-            return DepositResponse::failure('User not found', 404);
+            return DepositServiceResponseDTO::failure(
+                'User not found.',
+                statusCode: Response::HTTP_NOT_FOUND
+            );
         }
 
-        if ($user->type !== UserType::Common) {
-            return DepositResponse::failure('Only COMMON users can deposit.', 403);
-        }
-
-        if ($valueInCents <= 0) {
-            return DepositResponse::failure('Amount must be greater than 0.', 422);
-        }
-
-        $wallet = DB::transaction(function () use ($user, $valueInCents) {
-            $useLock = Config::get('feature-flags.use_pessimistic_lock', true);
-
-            $wallet = $useLock ? $user->wallet()->lockForUpdate()->first() : $user->wallet;
+        // Wrap deposit in a DB transaction
+        return DB::transaction(function () use ($user, $valueInCents) {
+            $wallet = $this->usePessimisticLock
+                ? $user->wallet()->lockForUpdate()->first()
+                : $user->wallet;
 
             if (! $wallet) {
-                throw new Exception('Wallet not found for user id ' . $user->id);
+                return DepositServiceResponseDTO::failure(
+                    'Wallet not found.',
+                    statusCode: Response::HTTP_NOT_FOUND
+                );
             }
 
+            // Update wallet balance
             $wallet->balance += $valueInCents;
             $wallet->save();
 
-            Transaction::create([
+            // Record transaction
+            $transaction = Transaction::create([
                 'payer_wallet_id' => $wallet->id,
                 'payee_wallet_id' => $wallet->id,
                 'type' => TransactionType::Deposit,
                 'amount' => $valueInCents,
             ]);
 
-            return $wallet;
+            return DepositServiceResponseDTO::success(
+                'Deposit processed successfully.',
+                ['transaction' => $transaction, 'wallet' => $wallet],
+                Response::HTTP_OK
+            );
         });
-
-        return DepositResponse::success($wallet);
     }
 }
