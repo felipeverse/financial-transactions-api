@@ -20,7 +20,8 @@ class BaseServiceResponseDTO implements JsonSerializable
         public string $message = '',
         public mixed $data = null,
         public int $statusCode
-    ) {}
+    ) {
+    }
 
     /**
      * Create a successful response instance.

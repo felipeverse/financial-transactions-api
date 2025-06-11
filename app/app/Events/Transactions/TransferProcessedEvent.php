@@ -10,7 +10,8 @@ use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 
 class TransferProcessedEvent implements ShouldDispatchAfterCommit
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
@@ -19,5 +20,6 @@ class TransferProcessedEvent implements ShouldDispatchAfterCommit
         public User $payer,
         public User $payee,
         public Transaction $transaction
-    ) {}
+    ) {
+    }
 }

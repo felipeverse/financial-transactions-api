@@ -6,7 +6,6 @@ use App\DTOs\Services\Responses\BaseServiceResponseDTO;
 
 class TransferServiceResponseDTO extends BaseServiceResponseDTO
 {
-
     public function __construct(
         bool $success,
         string $message = '',

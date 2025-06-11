@@ -2,19 +2,15 @@
 
 namespace Tests\Feature;
 
-use Mockery;
 use Exception;
 use Tests\TestCase;
 use App\Models\User;
 use App\Enums\UserType;
 use App\Enums\TransactionType;
 use App\Services\TransactionService;
-use App\Services\NotificationService;
 use Illuminate\Support\Facades\Event;
 use App\Services\TransactionAuthorizerService;
 use App\Events\Transactions\TransferProcessedEvent;
-use App\DTOs\Services\Notification\SendNotificationResponse;
-use App\DTOs\Services\TransactionAuthorizer\AuthorizeResponse;
 use App\DTOs\Services\Responses\TransactionAuthorizer\AuthorizeServiceResponseDTO;
 
 class TransferTest extends TestCase

@@ -18,7 +18,9 @@ use App\Http\Resources\Api\Transaction\TransferResponseResource;
  */
 class TransactionController extends Controller
 {
-    public function __construct(protected TransactionService $transactionService) {}
+    public function __construct(protected TransactionService $transactionService)
+    {
+    }
 
     /**
      * Handles deposit transaction request.
