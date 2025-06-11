@@ -1,0 +1,113 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Simplebank API",
+        "description": "API for managing user wallets, including deposits, transfers, and balance retrieval.",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/transactions/deposit": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Make a deposit into a user wallet",
+                "description": "Handles deposit transaction request.",
+                "operationId": "755465359f36ca129cdce64b3a2db773",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "payer_id",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "payer_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "value": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Deposit successful"
+                    },
+                    "500": {
+                        "description": "Unexpected error."
+                    }
+                }
+            }
+        },
+        "/transactions/transfer": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Make a transfer between user wallets",
+                "description": "Handles transfer transaction request.",
+                "operationId": "d899fb5908a4a1168b2d395a93e72b76",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "payer_id",
+                                    "payee_id",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "payer_id": {
+                                        "description": "ID of the user sending the money",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "payee_id": {
+                                        "description": "ID of the user receiving the money",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "value": {
+                                        "description": "Amount to transfer (up to 2 decimal places, greater than zero)",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Transfer successful"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Unexpected error"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Transactions",
+            "description": "Transactions"
+        }
+    ]
+}

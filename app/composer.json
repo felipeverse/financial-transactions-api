@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "darkaonline/l5-swagger": "^9.0",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.32",
         "laravel/tinker": "^2.10.1",
@@ -66,7 +67,8 @@
         "lint": "pint --test",
         "fix": "pint",
         "stan": "phpstan analyse --memory-limit=512M",
-        "md": "phpmd app text cleancode,codesize,controversial,design,naming,unusedcode"
+        "md": "phpmd app text cleancode,codesize,controversial,design,naming,unusedcode",
+        "swagger": "php artisan l5-swagger:generate"
     },
     "extra": {
         "laravel": {
