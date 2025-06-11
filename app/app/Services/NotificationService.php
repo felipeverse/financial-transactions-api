@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use Throwable;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\PendingRequest;
 use Symfony\Component\HttpFoundation\Response;
+use App\DTOs\Services\Responses\BaseServiceResponseDTO;
 use App\DTOs\Services\Responses\Notification\SendNotificationServiceResponseDTO;
 
 /**
  * Service responsible for sending user notifications via external service.
  */
-class NotificationService
+class NotificationService extends BaseService
 {
     protected PendingRequest $http;
     protected $retries = 3;
@@ -36,7 +36,7 @@ class NotificationService
      * @param string $message - Message to be sent
      * @return SendNotificationServiceResponseDTO - Standardized service response
      */
-    public function sendNotification(int $userId, string $message): SendNotificationServiceResponseDTO
+    public function sendNotification(int $userId, string $message): BaseServiceResponseDTO
     {
         try {
             $response = $this->http->post('{+endpoint}/notify', [
@@ -58,14 +58,7 @@ class NotificationService
                 statusCode: $response->status()
             );
         } catch (Throwable $th) {
-            Log::error('Service exception: Unexpected error during notification', [
-                'exception' => $th,
-            ]);
-
-            return SendNotificationServiceResponseDTO::failure(
-                'Unexpected error.',
-                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+            return $this->handleException($th);
         }
     }
 }

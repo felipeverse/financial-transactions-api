@@ -9,19 +9,19 @@ use App\Enums\UserType;
 use App\Models\Transaction;
 use App\Enums\TransactionType;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Event;
 use App\Exceptions\WalletNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
 use App\Exceptions\InsufficientBalanceException;
 use App\Events\Transactions\TransferProcessedEvent;
+use App\DTOs\Services\Responses\BaseServiceResponseDTO;
 use App\DTOs\Services\Responses\Transaction\DepositServiceResponseDTO;
 use App\DTOs\Services\Responses\Transaction\TransferServiceResponseDTO;
 
 /**
  * Service responsible for handling transaction operations.
  */
-class TransactionService
+class TransactionService extends BaseService
 {
     /**
      * Flag to enable/disable pessimistic locking during wallet updates.
@@ -44,7 +44,7 @@ class TransactionService
      * @param integer $valueInCents - Deposit amount in cents
      * @return DepositServiceResponseDTO - Standardized seervice response
      */
-    public function deposit(int $payerId, int $valueInCents): DepositServiceResponseDTO
+    public function deposit(int $payerId, int $valueInCents): BaseServiceResponseDTO
     {
         try {
             // Validate positive amount
@@ -94,25 +94,14 @@ class TransactionService
                     Response::HTTP_OK
                 );
             });
-        } catch (WalletNotFoundException $e) {
-            Log::error(
-                'Service exception: ' . $e->getMessage(),
-                ['exception' => $e,]
-            );
-
-            return DepositServiceResponseDTO::failure(
-                $e->getMessage(),
-                statusCode: $e->getCode()
+        } catch (WalletNotFoundException $exception) {
+            return $this->handleException(
+                $exception,
+                $exception->getMessage(),
+                $exception->getCode()
             );
         } catch (Throwable $th) {
-            Log::error('Service exception: Unexpected error during deposit', [
-                'exception' => $th,
-            ]);
-
-            return DepositServiceResponseDTO::failure(
-                'Unexpected error.',
-                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+            return $this->handleException($th);
         }
     }
 
@@ -124,7 +113,7 @@ class TransactionService
      * @param integer $valueInCents - Transfer amount in cents.
      * @return TransferServiceResponseDTO - Standardized service response.
      */
-    public function transfer(int $payerId, int $payeeId, int $valueInCents): TransferServiceResponseDTO
+    public function transfer(int $payerId, int $payeeId, int $valueInCents): BaseServiceResponseDTO
     {
         try {
             // Must transfer to a different user
@@ -240,25 +229,14 @@ class TransactionService
             });
 
             return $response;
-        } catch (InsufficientBalanceException $e) {
-            Log::error(
-                'Service exception: ' . $e->getMessage(),
-                ['exception' => $e,]
-            );
-
-            return TransferServiceResponseDTO::failure(
-                $e->getMessage(),
-                statusCode: $e->getCode()
+        } catch (InsufficientBalanceException $exception) {
+            return $this->handleException(
+                $exception,
+                $exception->getMessage(),
+                $exception->getCode()
             );
         } catch (Throwable $th) {
-            Log::error('Service exception: Unexpected error during transfer', [
-                'exception' => $th,
-            ]);
-
-            return TransferServiceResponseDTO::failure(
-                'Unexpected error.',
-                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+            return $this->handleException($th);
         }
     }
 }

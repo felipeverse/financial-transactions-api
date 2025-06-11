@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api;
 use Throwable;
 use App\Support\Money;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use App\Services\TransactionService;
 use App\Http\Requests\Api\Transaction\DepositRequest;
 use App\Http\Requests\Api\Transaction\TransferRequest;
@@ -16,7 +14,7 @@ use App\Http\Resources\Api\Transaction\TransferResponseResource;
 /**
  * Handles API requests related to transactions.
  */
-class TransactionController extends Controller
+class TransactionController extends ApiBaseController
 {
     public function __construct(protected TransactionService $transactionService)
     {
@@ -57,11 +55,7 @@ class TransactionController extends Controller
                 $response->statusCode
             );
         } catch (Throwable $th) {
-            Log::error('Unexpected error during deposit', [
-                'exception' => $th,
-            ]);
-
-            return response()->json(['error' => 'Unexpected error'], 500);
+            return $this->handleException($th);
         }
     }
 
@@ -101,12 +95,7 @@ class TransactionController extends Controller
                 $response->statusCode
             );
         } catch (Throwable $th) {
-            Log::error('Controller exception: Unexpected error during transfer', [
-                'exception' => $th,
-            ]);
-
-            return response()->json(['error' => 'Unexpected error'], 500);
-        } {
+            return $this->handleException($th);
         }
     }
 }

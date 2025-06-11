@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Throwable;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\PendingRequest;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,7 +11,7 @@ use App\DTOs\Services\Responses\TransactionAuthorizer\AuthorizeServiceResponseDT
 /**
  * Service responsible for authorizing transactions via external service.
  */
-class TransactionAuthorizerService
+class TransactionAuthorizerService extends BaseService
 {
     protected PendingRequest $http;
     protected $retries = 3;
@@ -64,14 +63,7 @@ class TransactionAuthorizerService
                 Response::HTTP_FORBIDDEN
             );
         } catch (Throwable $th) {
-            Log::error('Service exception: Unexpected error during transfer', [
-                'exception' => $th,
-            ]);
-
-            return AuthorizeServiceResponseDTO::failure(
-                'Unexpected error.',
-                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+            return $this->handleException($th);
         }
     }
 }
