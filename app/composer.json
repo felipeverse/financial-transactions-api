@@ -3,7 +3,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
@@ -19,6 +22,7 @@
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "nunomaduro/larastan": "^3.4",
+        "phpmd/phpmd": "^2.15",
         "phpunit/php-code-coverage": "^11.0",
         "phpunit/phpunit": "^11.5.3"
     },
@@ -57,7 +61,11 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
-        ]
+        ],
+        "lint": "pint --test",
+        "fix": "pint",
+        "stan": "phpstan analyse --memory-limit=512M",
+        "md": "phpmd app text cleancode,codesize,controversial,design,naming,unusedcode"
     },
     "extra": {
         "laravel": {
