@@ -5,7 +5,8 @@ services:
     image: nginx:alpine
     container_name: nginx
     depends_on: 
-      - app
+      - app1
+      - app2
     ports:
       - "80:80"
     volumes: 
@@ -16,11 +17,11 @@ services:
     mem_limit: 128m
     cpus: 0.25
 
-  app:
+  app1:
     build:
       context: ./app
       dockerfile: Dockerfile
-    container_name: app
+    container_name: app1
     working_dir: /var/www/app
     volumes:
       - ./app:/var/www/app
@@ -32,6 +33,32 @@ services:
         - api.simplebank.local
     depends_on:
       - mysql
+      - redis
+    environment:
+      DB_HOST: mysql
+      DB_DATABASE: simplebank
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      DB_PORT: 3306
+    mem_limit: 512m
+    cpus: 1.0
+  app2:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: app2
+    working_dir: /var/www/app
+    volumes:
+      - ./app:/var/www/app
+    entrypoint: ["php-fpm"]
+    networks:
+      simplebank_net:
+        aliases:
+        - app.simplebank.local
+        - api.simplebank.local
+    depends_on:
+      - mysql
+      - redis
     environment:
       DB_HOST: mysql
       DB_DATABASE: simplebank
