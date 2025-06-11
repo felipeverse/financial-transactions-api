@@ -13,6 +13,13 @@ use App\Http\Resources\Api\Transaction\TransferResponseResource;
 
 /**
  * Handles API requests related to transactions.
+ *
+ * /**
+ * @OA\Info(
+ *     version="1.0.0",
+ *     title="Simplebank API",
+ *     description="API for managing user wallets, including deposits, transfers, and balance retrieval.",
+ * )
  */
 class TransactionController extends ApiBaseController
 {
@@ -22,6 +29,28 @@ class TransactionController extends ApiBaseController
 
     /**
      * Handles deposit transaction request.
+     *
+     * @OA\Post(
+     *     path="/transactions/deposit",
+     *     summary="Make a deposit into a user wallet",
+     *     tags={"Transactions"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"payer_id", "value"},
+     *             @OA\Property(property="payer_id", type="integer", example=1),
+     *             @OA\Property(property="value", type="number", format="float", example=100.00)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Deposit successful"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Unexpected error."
+     *     )
+     * )
      *
      * @param DepositRequest $request
      * @return JsonResponse
@@ -61,6 +90,33 @@ class TransactionController extends ApiBaseController
 
     /**
      * Handles transfer transaction request.
+     *
+     * @OA\Post(
+     *     path="/transactions/transfer",
+     *     summary="Make a transfer between user wallets",
+     *     tags={"Transactions"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"payer_id", "payee_id", "value"},
+     *             @OA\Property(property="payer_id", type="integer", example=1, description="ID of the user sending the money"),
+     *             @OA\Property(property="payee_id", type="integer", example=2, description="ID of the user receiving the money"),
+     *             @OA\Property(property="value", type="number", format="float", example=50.00, description="Amount to transfer (up to 2 decimal places, greater than zero)")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Transfer successful"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Unexpected error"
+     *     )
+     * )
      *
      * @param TransferRequest $request
      * @return JsonResponse
