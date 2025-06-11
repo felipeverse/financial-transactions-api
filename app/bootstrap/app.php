@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
+use App\Http\Middleware\LogApiRequestMiddleware;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -14,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/web.php'));
 
             Route::domain('api.simplebank.local')
-                ->middleware('api')
+                ->middleware('api', LogApiRequestMiddleware::class)
                 ->group(base_path('routes/api.php'));
 
             Route::middleware('web')

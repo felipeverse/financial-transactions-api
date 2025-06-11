@@ -81,6 +81,13 @@ return [
             'after_commit' => true,
         ],
 
+        'logs' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('REDIS_QUEUE_NOTIFICATIONS', 'logs'),
+            'retry_after' => (int) 10,
+            'block_for' => null,
+        ],
     ],
 
     /*

@@ -208,7 +208,7 @@ return [
             'supervisor-1' => [
                 'connection' => 'redis',
                 'maxProcesses' => 3,
-                'queue' => ['default', 'notifications'],
+                'queue' => ['default', 'notifications', 'logs'],
                 'balance' => 'auto',
                 'processes' => 2,
                 'tries' => 3,
