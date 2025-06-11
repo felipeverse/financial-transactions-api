@@ -26,6 +26,7 @@
         "nunomaduro/larastan": "^3.4",
         "phpmd/phpmd": "^2.15",
         "phpunit/php-code-coverage": "^11.0",
+        "opcodesio/log-viewer": "^3.17",
         "phpunit/phpunit": "^11.5.3"
     },
     "autoload": {
@@ -68,7 +69,8 @@
         "fix": "pint",
         "stan": "phpstan analyse --memory-limit=512M",
         "md": "phpmd app text cleancode,codesize,controversial,design,naming,unusedcode",
-        "swagger": "php artisan l5-swagger:generate"
+        "swagger": "php artisan l5-swagger:generate",
+        "log-viewer": "php artisan log-viewer:publish"
     },
     "extra": {
         "laravel": {
