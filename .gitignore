@@ -1,0 +1,12 @@
+.env
+.env.backup
+.env.production
+
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+*.log
+
+docker-compose.override.yml
