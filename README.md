@@ -261,16 +261,18 @@ docker compose logs -f
 
 ---
 
-## Melhorias Futuras
+## Future Improvements
 
--   [ ] Add a repository layer with cache
--   [ ] Increase unit test coverage across layers
--   [ ] Improve architecture (Clean, Onion, Hexagonal)
--   [ ] Scheduled transfers
--   [ ] Asynchronous transactions with UUID tracking
--   [ ] Integration with observability stack (Logs, Traces, Telemetry)
--   [ ] Automated load testing using specialized tools
--   [ ] Explore NoSQL alternatives for specific use cases
+The following enhancements are planned for upcoming versions, following the [initial release v1.0.0](https://github.com/felipeverse/financial-transactions-api/releases/tag/v1.0.0). Each feature will be linked to its corresponding release once implemented.
+
+-   [ ] Add a repository layer with caching support
+-   [ ] Increase unit test coverage across all layers
+-   [ ] Evolve architecture (Clean, Onion, or Hexagonal)
+-   [ ] Support scheduled (delayed) transfers
+-   [ ] Enable asynchronous transactions with UUID tracking
+-   [ ] Integrate with observability stack (logs, tracing, telemetry)
+-   [ ] Automate load testing using specialized tools
+-   [ ] Explore NoSQL for domain-specific use cases
 -   [ ] Improve message queue and broker implementations
 
 ---
