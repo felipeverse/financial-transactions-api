@@ -21,7 +21,8 @@ for i in {1..60}; do
   sleep 1
 done
 
-chown -R www-data:www-data /var/www/app/storage /var/www/app/bootstrap/cache
+touch /var/www/app/storage/logs/laravel.log
+chown -R www-data:www-data /var/www/app
 chmod -R 775 /var/www/app/storage /var/www/app/bootstrap/cache
 
 composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -30,5 +31,8 @@ php artisan key:generate
 
 php artisan migrate --force
 php artisan db:seed --force
+
+php artisan l5-swagger:generate
+php artisan log-viewer:publish
 
 exec php-fpm
