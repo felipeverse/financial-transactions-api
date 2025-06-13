@@ -1,85 +1,85 @@
-# API de transações financeiras (financial-transactions-api)
+# Financial Transactions API
 
-## Descrição
+## Overview
 
-**Sistema backend de transações financeiras com foco em concorrência, escalabilidade e alta disponibilidade.**
-Permite depósitos e transferências entre usuários comuns e lojistas, com validações externas, notificações assíncronas, controle transacional rigoroso e suporte à idempotência.
-
----
-
-## Tecnologias Utilizadas
-
--   **Laravel** – Framework PHP para APIs RESTful robustas
--   **Docker** – Containerização e orquestração dos serviços
--   **Nginx** – Proxy reverso e balanceador de carga (least_conn)
--   **MySQL** – Banco relacional com suporte a transações ACID
--   **Redis** – Cache e filas de jobs em memória
--   **Laravel Horizon** – Monitoramento de filas e processamento assíncrono
+**A backend system for handling financial transactions, designed for concurrency, scalability, and high availability.** Supports deposits and transfers between regular users and merchants, featuring external validations, asynchronous notifications, strict transactional control, and idempotency support.
 
 ---
 
-## Arquitetura
+## Tech Stack
 
-### Visão Geral
+-   **Laravel** – PHP framework for building robust RESTful APIs
+-   **Docker** – Service containerization and orchestration
+-   **Nginx** – Reverse proxy and load balancer (least_conn algorithm)
+-   **MySQL** – Relational database with ACID transaction support
+-   **Redis** – In-memory caching and job queueing
+-   **Laravel Horizon** – Monitoring for job queues and async processing
+
+---
+
+## Architecture
+
+### High-Level Diagram
 
 ![image.png](./docs/images/image.png)
 
--   **Load balancer (Nginx)** - Distribui as requisições entre as múltiplas instâncias
--   **Múltiplas instâncias de aplicação** - 2+ instâncias Laravel rodando simultaneamente
--   **Banco de dados MySQL** - Controle de concorrência com Pessimistic Lock
--   **Cache e filas com Redis** - Cache de consultas frequentes e armazenamento de filas de jobs
--   **Sistema de filas (Laravel Horizon)** - Processamento assíncrono de notificações e logs
+-   **Load balancer (Nginx)** - Distributes incoming requests across app instances
+-   **Multiple Laravel App Instances** - Ensures horizontal scalability
+-   **MySQL Database** - Manages data integrity with pessimistic locking
+-   **Redis** - Used for caching, queueing and idempotency key
+-   **Queue System (Horizon)** - Handles asynchronous jobs and background processing
 
-### Modelagem de dados no banco
+### Database Modeling
 
 ![image.png](./docs/images/image%201.png)
 
-### Tratamento de Deadlocks
+### Deadlock Handling Strategy
 
 ![image.png](./docs/images/image%202.png)
 
-O sistema implementa ordenação determinística dos locks para evitar deadlocks. Sempre faz lock dos recursos na mesma ordem, independente da direção da transação.
+The system uses **deterministic locking** order to avoid deadlocks. Resources are always locked in the same order, regardless of transaction direction.
 
-Exemplo: Para transferências entre Wallet 1 e Wallet 2, sempre faz lock primeiro da wallet com menor ID. Isso garante que apenas uma transação por vez tenha acesso aos recursos, eliminando completamente a de deadlock.
-
----
-
-## Funcionalidades Implementadas
-
-### Depósito
-
--   Camadas organizadas: Controller → DTO → Service
--   Manipulação de valores em centavos (inteiros) para evitar erros com ponto flutuante
--   Suporte a lock pessimista (via feature flag)
--   Scripts de simulação para concorrência
-
-### Transferência
-
--   Validação de saldo e autorização via mock externo (`/authorize`)
--   Manipulação monetária segura (inteiros) com conversão automática
--   Transação ACID com rollback em inconsistências
--   Lock pessimista por ordenação determinística
--   Idempotência ativa para evitar duplicidade em retries
--   Suporte a testes de concorrência e deadlock com scripts dedicados
-
-### Notificações asíncronas
-
--   Envio de POST para mock externo (`/notify`)
--   Executadas em background com retry/backoff automático
--   Lógica desacoplada do core da aplicação
-
-### Logging assíncrono
-
--   Middleware dedicado captura requests/responses
--   Logs processados via filas, sem impacto na latência da API
+For example, when transferring between Wallet 1 and Wallet 2, the wallet with the lowest ID is always locked first — ensuring only one transaction accesses those records at a time, effectively eliminating deadlocks.
 
 ---
 
-## Documentação da API
+## Features
+
+### Deposits
+
+-   Clean layering: Controller → DTO → Service
+-   Monetary values handled in cents (integers) to avoid floating-point issues
+-   Optional pessimistic locking via feature flag
+-   Built-in idempotency to prevent duplicate execution on retries
+-   Includes simulation scripts for concurrent operations
+
+### Transfers
+
+-   Balance validation and external authorization via mocked (`/authorize`)
+-   Safe integer-based money handling with automatic conversion
+-   Fully ACID-compliant transaction with rollback support
+-   Deterministic resource locking for concurrency control
+-   Built-in idempotency to prevent duplicate execution on retries
+-   Scripts provided for testing concurrency and deadlocks
+
+### Asynchronous Notifications
+
+-   Sends POST requests to external mock (`/notify`)
+-   Executed in background with retry and exponential backoff
+-   Decoupled from core business logic
+
+### Asynchronous Logging
+
+-   Dedicated middleware captures requests and responses
+-   Logs are processed via job queues to avoid affecting response time
+
+---
+
+## API Documentation
 
 ### POST api/transactions/deposit
 
-Realiza depósito na carteira do usuário
+Deposits funds into a user wallet.
 
 **Request**
 
@@ -112,7 +112,7 @@ Realiza depósito na carteira do usuário
 
 ### POST api/transactions/transfer
 
-Realiza transferências entre usuários
+Transfers funds between users.
 
 **Request**
 
@@ -146,10 +146,10 @@ Realiza transferências entre usuários
 
 ---
 
-## Testes
+## Testing
 
--   **Cobertura:** Unitários, integração e concorrência
--   **Scripts incluídos:**
+-   **Coverage:** Integration and concurrency tests via scripts
+-   **Included scripts:**
     -   `1_concurrent_deposit_test.sh`
     -   `2_concurrent_transfer_test.sh`
     -   `3_concurrent_transfer_deadlocking_test.sh`
@@ -157,79 +157,123 @@ Realiza transferências entre usuários
 
 ---
 
-## Qualidade de Código
+## Code Quality
 
--   **Pint (PSR-12):** Lint e fix automático
--   **PHPStan (Larastan):** Análise estática de nível elevado
--   **PHP Mess Detector:** Detecção de _code smells_ e complexidade excessiva
--   **Hooks de pré-commit:** Executam Pint automaticamente
+-   **Pint (PSR-12):** Auto-formatting and linting
+-   **PHPStan (Larastan):** Static analysis with strict levels
+-   **PHP Mess Detector:** Detects code smells and complexity
+-   **Hooks de pré-commit:** Automatically run Pint before commits
 
-### Comandos úteis
+### Common Commands
 
 ```bash
-# Testes
+# Runt tests
 docker compose exec app1 php artisan test
 docker compose exec app1 php artisan test --coverage
 
-# Lint e fix
+# Linting
 docker compose exec app1 composer run lint
 docker compose exec app1 composer run fix
 
-# Análise estática e code smells
+# Static analysis and code smells
 docker compose exec app1 composer run stan
 docker compose exec app1 composer run md
 ```
 
-## Documentação e Monitoramento
+## Documentation & Monitoring
 
 -   Swagger UI: [`localhost/api/documentation`](http://localhost/api/documentation)
--   Horizon (monitoramento de filas): [`localhost/horizon`](http://localhost/horizon)
--   Visualizador de logs: [`localhost/log-viewer`](http://localhost/log-viewer)
+-   Horizon Dashboard: [`localhost/horizon`](http://localhost/horizon)
+-   Log Viewer: [`localhost/log-viewer`](http://localhost/log-viewer)
 
 ```bash
-# Gerar documentação Swagger
+# Generate Swagger docs
 docker compose exec app1 composer run swagger
 
-# Publicar visualizador de logs
+# Publish log viewer assets
 docker compose exec app1 composer run log-viewer
 
 ```
 
 ---
 
-## Instalação
+## Installation
 
-### Pré-requisitos
+### Prerequisites
 
--   Docker e Docker Compose
--   Git
+-   [Docker](https://www.docker.com/)
+-   [Docker Compose](https://docs.docker.com/compose/)
+-   [Git](https://git-scm.com/)
 
-### Passos
+### Steps
+
+Clone this repository:
 
 ```bash
 git clone https://github.com/seu-usuario/simplebank.git
 cd simplebank
+```
 
-# Iniciar containers
+Copy the example .env file:
+
+```bash
+cp .env.example .env
+```
+
+Edit the .env file. Default values:
+
+```bash
+# MySQL
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=simplebank
+DB_USERNAME=user
+DB_PASSWORD=password
+
+# Redis
+CACHE_STORE=redis
+REDIS_CLIENT=phpredis
+REDIS_HOST=redis
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+# Concurrency flags
+USE_PESSIMISTIC_LOCK=true
+AVOID_DEADLOCK=true
+
+# External services
+TRANSACTION_AUTHORIZER_SERVICE_URL="https://util.devi.tools/api/v2"
+NOTIFICATION_SERVICE_URL="https://util.devi.tools/api/v1"
+```
+
+Start containers
+
+```
 docker compose up -d
+```
 
-# (Opcional) acompanhar logs
+(Optional) Tail logs
+
+```
 docker compose logs -f
-
 ```
 
 ---
 
 ## Melhorias Futuras
 
--   Implementação da camada de repositórios com cache
--   Autenticação e controle de acesso
--   Rate limiting por usuário
--   Agendamento de transferências
--   Transações assíncronas com consulta por UUID
--   Integração com stack de observabilidade (ex: ELK)
--   Testes de carga automatizados com ferramentas especializadas
+-   [ ] Add a repository layer with cache
+-   [ ] Increase unit test coverage across layers
+-   [ ] Improve architecture (Clean, Onion, Hexagonal)
+-   [ ] Scheduled transfers
+-   [ ] Asynchronous transactions with UUID tracking
+-   [ ] Integration with observability stack (Logs, Traces, Telemetry)
+-   [ ] Automated load testing using specialized tools
+-   [ ] Explore NoSQL alternatives for specific use cases
+-   [ ] Improve message queue and broker implementations
 
 ---
 
-Projeto desenvolvido como prova de conceito de uma aplicação financeira simplificada, com foco em boas práticas de backend, confiabilidade transacional e observabilidade.
+This project was developed as a proof of concept for a simplified financial platform.
+It emphasizes backend best practices, transactional reliability, and observability.
